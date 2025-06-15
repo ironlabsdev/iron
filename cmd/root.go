@@ -14,6 +14,12 @@ import (
 var cfgFile string
 var Verbose bool
 
+const (
+	ColorRed   = "\033[31m"
+	ColorGreen = "\033[32m"
+	ColorReset = "\033[0m"
+)
+
 var rootCmd = &cobra.Command{
 	Use:     "iron",
 	Short:   "",
@@ -25,7 +31,8 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "\n> Command failed: %s\n\n", err)
+		// Print error in red color
+		_, _ = fmt.Fprintf(os.Stderr, "%s✗ %s%s\n", ColorRed, err.Error(), ColorReset)
 		os.Exit(1)
 	}
 }
@@ -36,6 +43,7 @@ func init() {
 	rootCmd.AddCommand(generate.GenerateCmd)
 	// Silence errors
 	rootCmd.SilenceErrors = true
+	rootCmd.SilenceUsage = true
 
 	rootCmd.DisableSuggestions = false
 	rootCmd.SuggestionsMinimumDistance = 4

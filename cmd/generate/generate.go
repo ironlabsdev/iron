@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//go:embed templates/*
+//go:embed all:templates/*
 var TemplatesFS embed.FS
 
 // GenerateCmd is the base command.
@@ -28,8 +28,8 @@ Available templates:
 	},
 }
 
-// FromTemplate copies and processes template files
-func FromTemplate(templateName, projectName string) error {
+// FromTemplate copies and processes template files to the specified full path
+func FromTemplate(templateName, fullPath string) error {
 	templatePath := filepath.Join("templates", templateName)
 
 	// Check if template exists
@@ -37,10 +37,18 @@ func FromTemplate(templateName, projectName string) error {
 		return fmt.Errorf("template '%s' not found", templateName)
 	}
 
-	// Create project directory
-	if err := os.MkdirAll(projectName, 0755); err != nil {
+	// Check if directory exists and validate it
+	if err := validateTargetDirectory(fullPath); err != nil {
+		return err
+	}
+
+	// Create project directory if it doesn't exist
+	if err := os.MkdirAll(fullPath, 0755); err != nil {
 		return fmt.Errorf("failed to create project directory: %w", err)
 	}
+
+	// Extract project name from the full path for template processing
+	projectName := filepath.Base(fullPath)
 
 	// Walk through template directory
 	err := fs.WalkDir(TemplatesFS, templatePath, func(path string, d fs.DirEntry, err error) error {
@@ -60,7 +68,7 @@ func FromTemplate(templateName, projectName string) error {
 		}
 
 		// Calculate destination path
-		destPath := filepath.Join(projectName, relPath)
+		destPath := filepath.Join(fullPath, relPath)
 
 		if d.IsDir() {
 			// Create directory
@@ -75,8 +83,38 @@ func FromTemplate(templateName, projectName string) error {
 		return fmt.Errorf("failed to generate from template: %w", err)
 	}
 
-	fmt.Printf("✅ Successfully generated %s project in '%s/'\n", templateName, projectName)
-	fmt.Printf("📁 Navigate to your project: cd %s\n", projectName)
+	fmt.Printf("✅ Successfully generated %s project in '%s'\n", templateName, fullPath)
+	fmt.Printf("📁 Navigate to your project: cd %s\n", fullPath)
+
+	return nil
+}
+
+// validateTargetDirectory checks if the target directory exists and is empty
+func validateTargetDirectory(fullPath string) error {
+	// Check if directory exists
+	info, err := os.Stat(fullPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// Directory doesn't exist, which is fine - we'll create it
+			return nil
+		}
+		return fmt.Errorf("failed to check directory: %w", err)
+	}
+
+	// Check if it's a directory
+	if !info.IsDir() {
+		return fmt.Errorf("path '%s' exists but is not a directory", fullPath)
+	}
+
+	// Check if directory is empty
+	entries, err := os.ReadDir(fullPath)
+	if err != nil {
+		return fmt.Errorf("failed to read directory: %w", err)
+	}
+
+	if len(entries) > 0 {
+		return fmt.Errorf("directory '%s' is not empty - cannot generate code in a non-empty directory", fullPath)
+	}
 
 	return nil
 }
