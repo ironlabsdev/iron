@@ -6,10 +6,17 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/ironlabsdev/iron/internal/utils"
 	"github.com/spf13/cobra"
+)
+
+const (
+	ColorGreen = "\033[32m"
+	ColorBlue  = "\033[34m"
+	ColorReset = "\033[0m"
 )
 
 //go:embed all:templates/*
@@ -67,8 +74,11 @@ func FromTemplate(templateName, fullPath string) error {
 			return err
 		}
 
+		// Handle special file renames
+		destRelPath := handleSpecialFileRenames(relPath)
+
 		// Calculate destination path
-		destPath := filepath.Join(fullPath, relPath)
+		destPath := filepath.Join(fullPath, destRelPath)
 
 		if d.IsDir() {
 			// Create directory
@@ -83,10 +93,25 @@ func FromTemplate(templateName, fullPath string) error {
 		return fmt.Errorf("failed to generate from template: %w", err)
 	}
 
-	fmt.Printf("✅ Successfully generated %s project in '%s'\n", templateName, fullPath)
-	fmt.Printf("📁 Navigate to your project: cd %s\n", fullPath)
+	// Print success message in green with colored icons
+	fmt.Printf("%s✓ Successfully generated %s project in '%s'%s\n", ColorGreen, templateName, fullPath, ColorReset)
+	fmt.Printf("%s→ Navigate to your project: %scd %s%s\n", ColorBlue, ColorReset, fullPath, ColorReset)
 
 	return nil
+}
+
+// handleSpecialFileRenames renames files back to their original names
+func handleSpecialFileRenames(relPath string) string {
+	// Handle go.mod and go.sum files
+	if strings.HasSuffix(relPath, "go.mod.template") {
+		return strings.TrimSuffix(relPath, ".template")
+	}
+	if strings.HasSuffix(relPath, "go.sum.template") {
+		return strings.TrimSuffix(relPath, ".template")
+	}
+
+	// You can add more special file handling here if needed
+	return relPath
 }
 
 // validateTargetDirectory checks if the target directory exists and is empty
@@ -143,6 +168,12 @@ func processTemplateFile(srcPath, destPath, projectName string) error {
 
 // shouldProcessAsTemplate determines if a file should be processed as a Go template
 func shouldProcessAsTemplate(path string) bool {
+	// Don't process files that end with .template as Go templates
+	// They should be renamed and copied as-is
+	if strings.HasSuffix(path, ".template") {
+		return false
+	}
+
 	// Process specific file types as templates
 	ext := filepath.Ext(path)
 	templateExts := []string{".go", ".mod", ".yaml", ".yml", ".json", ".md", ".txt", ".env"}
