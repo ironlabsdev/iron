@@ -11,9 +11,7 @@ type Conf struct {
 	DB           ConfDB
 	Auth         ConfAuth
 	Server       ConfServer
-	Posthog      ConfPosthog
 	GoogleAuth   ConfGoogleAuth
-	GithubAuth   ConfGithubAuth
 	IsProduction bool
 }
 
@@ -24,7 +22,6 @@ type ConfServer struct {
 	Secret       []byte        `env:"SECRET_KEY,required"`
 	Domain       string        `env:"DOMAIN,default=localhost"`
 	Protocol     string        `env:"PROTOCOL,default=http"`
-	SupportMail  string        `env:"SUPPORT_MAIL,required"`
 	TimeoutIdle  time.Duration `env:"SERVER_TIMEOUT_IDLE,required"`
 	TimeoutRead  time.Duration `env:"SERVER_TIMEOUT_READ,required"`
 	TimeoutWrite time.Duration `env:"SERVER_TIMEOUT_WRITE,required"`
@@ -46,11 +43,6 @@ type ConfAuth struct {
 type ConfGoogleAuth struct {
 	ID     string `env:"GOOGLE_CLIENT_ID,required"`
 	Secret string `env:"GOOGLE_CLIENT_SECRET,required"`
-}
-
-type ConfGithubAuth struct {
-	ID     string `env:"GITHUB_CLIENT_ID,required"`
-	Secret string `env:"GITHUB_CLIENT_SECRET,required"`
 }
 
 func (c *Conf) GetBaseURL() string {
