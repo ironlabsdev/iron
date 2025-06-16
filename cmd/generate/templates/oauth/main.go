@@ -10,7 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/go-chi/chi/v5"
+	chi "github.com/go-chi/chi/v5"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -21,6 +21,7 @@ import (
 )
 
 var logFilePath = "logs/app.log"
+const fmtDBString = "host=%s user=%s password=%s dbname=%s port=%d sslmode=disable"
 
 func main() {
 	if err := godotenv.Load(); err != nil {
@@ -32,8 +33,9 @@ func main() {
 		log.Fatalf("Could not create log file")
 	}
 
-	l.Info().Str("url", conf.DB.DBURL).Msg("Starting new database connection")
-	dbConfig, err := pgxpool.ParseConfig(conf.DB.DBURL)
+	l.Info().Str("host", conf.DB.Host).Int("port", conf.DB.Port).Str("database", conf.DB.DBName).Msg("Connecting to database")
+	dbString := fmt.Sprintf(fmtDBString, conf.DB.Host, conf.DB.Username, conf.DB.Password, conf.DB.DBName, conf.DB.Port)
+	dbConfig, err := pgxpool.ParseConfig(dbString)
 	if err != nil {
 		l.Fatal().Err(err).Msg("Failed to parse database config")
 		return
