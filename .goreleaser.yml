@@ -1,0 +1,136 @@
+version: 2
+
+project_name: iron
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/ironlabsdev/iron/internal/version.Version={{.Version}}
+      - -X github.com/ironlabsdev/iron/internal/version.BuildDate={{.Date}}
+      - -X github.com/ironlabsdev/iron/internal/version.GitCommit={{.Commit}}
+    main: ./main.go
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^style:'
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: 'New Features'
+      regexp: '^.*?feat(\(.+\))??!?:.+$'
+      order: 0
+    - title: 'Bug fixes'
+      regexp: '^.*?fix(\(.+\))??!?:.+$'
+      order: 1
+    - title: 'Improvements'
+      regexp: '^.*?(refactor|perf)(\(.+\))??!?:.+$'
+      order: 2
+    - title: Other
+      order: 999
+
+# GitHub release
+release:
+  github:
+    owner: ironlabsdev
+    name: iron
+  draft: false
+  prerelease: auto
+  name_template: "{{.ProjectName}} v{{.Version}}"
+  header: |
+    ## Iron CLI v{{.Version}}
+    
+    Thanks for using Iron CLI! This release includes bug fixes and improvements.
+    
+    ### Installation
+    
+    #### Install Script (Recommended)
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/ironlabsdev/iron/main/install.sh | bash
+    ```
+    
+    #### Homebrew
+    ```bash
+    brew install ironlabsdev/tap/iron
+    ```
+    
+    #### Manual Download
+    Download the appropriate binary for your platform from the assets below.
+
+# Homebrew
+brews:
+  - name: iron
+    repository:
+      owner: ironlabsdev
+      name: homebrew-tap
+    folder: Formula
+    homepage: https://github.com/ironlabsdev/iron
+    description: "CLI tool for scaffolding educational programming projects"
+    license: MIT
+    test: |
+      system "#{bin}/iron --version"
+    install: |
+      bin.install "iron"
+
+# Linux packages
+nfpms:
+  - id: packages
+    package_name: iron
+    file_name_template: "{{ .ConventionalFileName }}"
+    vendor: IronLabs Dev
+    homepage: https://github.com/ironlabsdev/iron
+    maintainer: IronLabs Dev <dev@ironlabs.dev>
+    description: |-
+      Iron CLI is a tool that helps students scaffold programming projects
+      and focus on core learning while simplifying the bootstrap process.
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+
+archives:
+  - id: iron
+    builds:
+      - default
+    format: tar.gz
+    name_template: >-
+      iron-
+      {{- if eq .Os "darwin" }}mac-
+      {{- else if eq .Os "windows" }}windows-
+      {{- else if eq .Os "linux" }}linux-{{end}}
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "arm64" }}arm64
+      {{- else }}{{.Arch}}{{end}}
+      {{- if .Arm }}v{{.Arm}}{{end}}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
