@@ -46,7 +46,7 @@ type ConfGoogleAuth struct {
 }
 
 func (c *Conf) GetBaseURL() string {
-	return c.Server.DevProtocol + "://" + c.Server.DevDomain
+	return c.Server.Protocol + "://" + c.Server.Domain
 }
 
 func (c *Conf) GetDomain() string {

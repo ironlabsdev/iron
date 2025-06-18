@@ -33,12 +33,12 @@ func (c *Controller) RegisterUses() {
 }
 
 func (c *Controller) RegisterRoutes() {
-	authHandler := auth.NewAuth(c.Logger, c.Validator, c.Conf, c.Pool, c.Store)
+	authHandler := auth.NewAuth(c.Logger, c.Conf, c.Pool, c.Store)
 	c.Router.Method(http.MethodGet, "/auth/{provider}", requestlog.NewHandler(authHandler.Login, c.Logger))
 	c.Router.Method(http.MethodGet, "/auth/{provider}/callback", requestlog.NewHandler(authHandler.Callback, c.Logger))
 	c.Router.Method(http.MethodGet, "/auth/{provider}/logout", requestlog.NewHandler(authHandler.Logout, c.Logger))
 
-	pageHandler := pages.NewPages(c.Logger, c.Validator, c.Conf, c.Pool, c.Store)
+	pageHandler := pages.NewPages(c.Logger, c.Conf, c.Pool, c.Store)
 	c.Router.Method(http.MethodGet, "/", requestlog.NewHandler(pageHandler.Home, c.Logger))
 	c.Router.Method(http.MethodGet, "/login", requestlog.NewHandler(pageHandler.Login, c.Logger))
 }
