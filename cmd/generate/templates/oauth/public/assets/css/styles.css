@@ -1615,13 +1615,6 @@
     }
   }
 }
-@font-face {
-  font-family: 'IntroRust';
-  src: url('/public/assets/fonts/IntroRust.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
 .dark {
   --color-background: hsl(221 25% 8%);
   --color-foreground: hsl(219 14% 91%);
@@ -1651,10 +1644,10 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-feature-settings: "rlig" 1, "calt" 1;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Noto Sans', sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'IntroRust', serif;
+    font-family: 'Noto Sans', serif;
   }
   h1 {
     font-size: var(--text-4xl);

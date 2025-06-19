@@ -29,10 +29,13 @@ func (c *Controller) RegisterUses() {
 	c.Router.Use(oauthMiddleware.RequestID)
 	c.Router.Use(oauthMiddleware.SetEnvConfig)
 	c.Router.Use(middleware.Logger)
-	c.Logger.Info().Str("environment", c.Conf.Server.ENV).Msg("Environment")
 }
 
 func (c *Controller) RegisterRoutes() {
+	publicFS := http.Dir("public")
+	c.Router.Handle("/public/*", http.StripPrefix("/public/",
+		pages.StaticFileHandler(publicFS)))
+
 	authHandler := auth.NewAuth(c.Logger, c.Conf, c.Pool, c.Store)
 	c.Router.Method(http.MethodGet, "/auth/{provider}", requestlog.NewHandler(authHandler.Login, c.Logger))
 	c.Router.Method(http.MethodGet, "/auth/{provider}/callback", requestlog.NewHandler(authHandler.Callback, c.Logger))

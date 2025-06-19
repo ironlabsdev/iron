@@ -16,7 +16,6 @@ type Conf struct {
 }
 
 type ConfServer struct {
-	ENV          string        `env:"APP_ENV,required"`
 	Port         int           `env:"SERVER_PORT,required"`
 	Debug        bool          `env:"SERVER_DEBUG,required"`
 	Secret       []byte        `env:"SECRET_KEY,required"`
@@ -58,10 +57,6 @@ func New() *Conf {
 	if err := envdecode.StrictDecode(&c); err != nil {
 		log.Fatalf("Failed to decode: %s", err)
 	}
-
-	AppEnv = c.Server.ENV
-	IsProduction = c.Server.ENV == PROD
-	c.IsProduction = IsProduction
 
 	return &c
 }

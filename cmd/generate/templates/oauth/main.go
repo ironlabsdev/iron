@@ -40,7 +40,6 @@ func main() {
 		l.Fatal().Err(err).Msg("Failed to parse database config")
 		return
 	}
-	dbConfig.ConnConfig.Tracer = &m
 	pool, err := pgxpool.NewWithConfig(
 		context.Background(),
 		dbConfig,
