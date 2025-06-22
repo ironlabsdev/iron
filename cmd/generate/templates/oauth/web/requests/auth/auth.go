@@ -7,6 +7,10 @@ import (
 	"fmt"
 	"net/http"
 
+	db "oauth/database/generated"
+	"oauth/utils/env"
+	"oauth/web/services"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -14,9 +18,6 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
-	db "oauth/database/generated"
-	"oauth/utils/env"
-	"oauth/web/services"
 	"github.com/rs/zerolog"
 )
 
@@ -55,18 +56,27 @@ func NewAuth(logger *zerolog.Logger, cfg *env.Conf, pool *pgxpool.Pool, store *s
 		Logger:      logger,
 		EnvConf:     cfg,
 		Queries:     db.New(pool),
-		UserService: services.NewUserService(pool),
+		UserService: services.NewUserService(pool, logger),
 	}
 }
 
 func (a *API) Login(w http.ResponseWriter, r *http.Request) {
 	provider := chi.URLParam(r, ProviderKey)
 	r = r.WithContext(context.WithValue(r.Context(), providerContextKey, provider))
+	a.Logger.Info().Str("provider", provider).Msg("New login provider request")
 
 	session, _ := a.Store.Get(r, SessionID)
+	for key, val := range session.Values {
+		a.Logger.Info().Interface("key", key).Msg("Login provider get cookie storage")
+		a.Logger.Info().Interface("session_val", val).Msg("Login provider get cookie storage")
+	}
+
 	isAuthenticated := session.Values[AuthenticatedKey]
-	// oAuthUser := session.Values[UserIDKey]
+	a.Logger.Info().Interface("isAuthenticated", isAuthenticated).Msg("Check if user is already authenticated")
+
 	if isAuthenticated != nil && isAuthenticated == true {
+		a.Logger.Info().Msg("User is already authenticated. Redirecting to base url")
+
 		http.Redirect(w, r, a.EnvConf.GetBaseURL(), http.StatusFound)
 	}
 

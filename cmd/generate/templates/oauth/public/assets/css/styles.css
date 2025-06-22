@@ -1649,6 +1649,9 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Noto Sans', serif;
   }
+  .color-white {
+    color: #ffff;
+  }
   h1 {
     font-size: var(--text-4xl);
     line-height: var(--tw-leading, var(--text-4xl--line-height));
@@ -1691,67 +1694,6 @@
     --tw-font-weight: var(--font-weight-semibold);
     font-weight: var(--font-weight-semibold);
   }
-}
-.iron-mask {
-  position: absolute;
-  width: 200px;
-  height: 300px;
-  padding: 32px;
-  background-color: var(--color-secondary);
-  mask: url("/public/images/mask_shape_3.svg") no-repeat center;
-  mask-size: contain;
-  -webkit-mask: url("/public/images/mask_shape_3.svg") no-repeat center;
-  -webkit-mask-size: contain;
-  --tw-shadow: 0 25px 50px -12px var(--tw-shadow-color, rgb(0 0 0 / 0.25));
-  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  animation-name: slowFloat;
-  animation-duration: 6s;
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-in-out;
-  filter: drop-shadow(0 25px 25px rgba(0, 0, 0, 0.15)) drop-shadow(0 10px 10px rgba(0, 0, 0, 0.1));
-}
-.iron-mask.iron-mask-bean {
-  background-color: var(--color-accent);
-  mask: url("/public/images/mask_shape_2.svg") no-repeat center;
-  mask-size: contain;
-  -webkit-mask: url("/public/images/mask_shape_2.svg") no-repeat center;
-  -webkit-mask-size: contain;
-  transform: rotateY(0deg) rotateX(20deg);
-}
-.iron-mask.iron-mask-right {
-  top: 0;
-  right: -225px;
-  transform: rotateY(0deg) rotateX(20deg);
-  animation-delay: 1.5s;
-}
-.iron-mask.iron-mask-left {
-  top: 0;
-  left: -225px;
-  transform: rotateY(0deg) rotateX(20deg);
-  animation-delay: 1.5s;
-}
-@keyframes slowFloat {
-  from {
-    transform: rotateY(0deg) translate(0, 0px);
-  }
-  65% {
-    transform: rotateY(0deg) translate(0, 15px);
-  }
-  to {
-    transform: rotateY(0deg) translate(0, -0px);
-  }
-}
-.iron-mask:nth-child(1) {
-  animation-delay: 0s;
-}
-.iron-mask:nth-child(2) {
-  animation-delay: 0.5s;
-}
-.iron-mask:nth-child(3) {
-  animation-delay: 1s;
-}
-.iron-mask:nth-child(4) {
-  animation-delay: 1.5s;
 }
 @property --tw-translate-x {
   syntax: "*";

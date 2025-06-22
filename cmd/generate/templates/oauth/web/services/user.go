@@ -6,21 +6,25 @@ import (
 	"errors"
 	"fmt"
 
+	db "oauth/database/generated"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/markbates/goth"
-	"oauth/database/generated"
+	"github.com/rs/zerolog"
 )
 
 type UserService struct {
 	pool    *pgxpool.Pool
+	logger  *zerolog.Logger
 	queries *db.Queries
 }
 
-func NewUserService(pool *pgxpool.Pool) *UserService {
+func NewUserService(pool *pgxpool.Pool, l *zerolog.Logger) *UserService {
 	return &UserService{
 		pool:    pool,
+		logger:  l,
 		queries: db.New(pool),
 	}
 }
@@ -78,6 +82,7 @@ func (s *UserService) CreateUserWithOAuth(ctx context.Context, req CreateUserWit
 		}
 
 		var oauthIdentity db.OauthIdentity
+		s.logger.Info().Interface("id_token", req.IDToken).Str("email", req.Email.String).Msg("Inserting oauth identity")
 		if errors.Is(err, pgx.ErrNoRows) {
 			// Create OAuth identity
 			oauthIdentity, err = qtx.CreateOAuthIdentity(ctx, db.CreateOAuthIdentityParams{

@@ -8,43 +8,50 @@ import (
 	"log"
 	"os"
 
+	"oauth/utils/env"
+	"oauth/utils/logger"
+
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
-	"oauth/utils/logger"
 )
 
 var logFilePath = "logs/migration-app.log"
+
+const fmtDBString = "host=%s user=%s password=%s dbname=%s port=%d sslmode=disable"
 
 func main() {
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("No .env file found")
 	}
 
-	ctx := context.Background()
 	l, err := logger.New(true, logFilePath)
 	if err != nil {
 		panic(err)
 	}
-	l.Info().Msg("Starting database migration process")
-	dbConfig, err := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
-	if err != nil {
-		log.Fatal("Failed to parse database config", err)
-	}
 
+	conf := env.New()
+	l.Info().Str("host", conf.DB.Host).Int("port", conf.DB.Port).Str("database", conf.DB.DBName).Msg("Connecting to database")
+	dbString := fmt.Sprintf(fmtDBString, conf.DB.Host, conf.DB.Username, conf.DB.Password, conf.DB.DBName, conf.DB.Port)
+	dbConfig, err := pgxpool.ParseConfig(dbString)
+	if err != nil {
+		l.Fatal().Err(err).Msg("Failed to parse database config")
+		return
+	}
 	pool, err := pgxpool.NewWithConfig(
-		ctx,
+		context.Background(),
 		dbConfig,
 	)
 	if err != nil {
-		log.Fatal("Failed to create database connection pool", err)
+		l.Fatal().Err(err).Msg("Failed to create database connection pool")
+		return
 	}
 	defer pool.Close()
 	l.Info().Msg("Database connection established successfully")
 
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	db, err := sql.Open("postgres", dbString)
 	if err != nil {
 		log.Fatal("Unable to connect to database ", err)
 	}

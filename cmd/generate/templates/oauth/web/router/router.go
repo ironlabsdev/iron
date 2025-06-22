@@ -44,4 +44,5 @@ func (c *Controller) RegisterRoutes() {
 	pageHandler := pages.NewPages(c.Logger, c.Conf, c.Pool, c.Store)
 	c.Router.Method(http.MethodGet, "/", requestlog.NewHandler(pageHandler.Home, c.Logger))
 	c.Router.Method(http.MethodGet, "/login", requestlog.NewHandler(pageHandler.Login, c.Logger))
+	c.Router.Method(http.MethodGet, "/restricted", requestlog.NewHandler(pageHandler.Restricted, c.Logger))
 }

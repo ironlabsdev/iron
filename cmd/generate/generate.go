@@ -27,7 +27,7 @@ var GenerateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate code from templates",
 	Long: `Generate code scaffolding from predefined templates.
-	
+
 Available templates:
   oauth   - OAuth authentication implementation`,
 	Run: func(cmd *cobra.Command, args []string) {

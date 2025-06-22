@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "oauth/views/layout"
 
-func Login() templ.Component {
+func Unauthorized() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,7 +43,7 @@ func Login() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container mx-auto px-4 py-16 flex flex-col gap-10 md:gap-20\"><section class=\"max-w-4xl mx-auto text-center\"><h1 class=\"text-5xl font-bold mb-6\">Login with <span class=\"text-accent\">OAuth</span></h1><div class=\"flex flex-col justify-center items-center gap-2\"><a class=\"inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors px-4 py-2 border\" href=\"/auth/google\">Login with Google</a> <a class=\"inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background bg-primary text-white px-4 py-2\" href=\"/restricted\">Access Restricted Content</a></div></section></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto mt-10 px-4 sm:px-0\"><div class=\"bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded\"><h1 class=\"font-bold text-xl mb-2\">❌ Unauthorized</h1><p class=\"mb-4\">You need to be logged in to access this page.</p><a href=\"/login\" class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Login</a></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
