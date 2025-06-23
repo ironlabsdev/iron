@@ -8,7 +8,8 @@ before:
     - go generate ./...
 
 builds:
-  - env:
+  - id: default
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
@@ -27,7 +28,7 @@ checksum:
   name_template: 'checksums.txt'
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 
 changelog:
   sort: asc
@@ -81,8 +82,30 @@ release:
     #### Manual Download
     Download the appropriate binary for your platform from the assets below.
 
+archives:
+  - id: default
+    builds:
+      - default
+    name_template: >-
+      iron-
+      {{- if eq .Os "darwin" }}mac-
+      {{- else if eq .Os "windows" }}windows-
+      {{- else if eq .Os "linux" }}linux-{{end}}
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "arm64" }}arm64
+      {{- else }}{{.Arch}}{{end}}
+      {{- if .Arm }}v{{.Arm}}{{end}}
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
+
 # Homebrew Casks (Updated for v2.10+)
-homebrew_casks:
+brews:
   - name: iron
     repository:
       owner: ironlabsdev
@@ -90,13 +113,11 @@ homebrew_casks:
     homepage: https://github.com/ironlabsdev/iron
     description: "CLI tool for scaffolding educational programming projects"
     license: MIT
-    # Post-install hook to remove quarantine bit (for unsigned binaries)
-    hooks:
-      post:
-        install: |
-          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/iron"]
-          end
+    # Only include archives for darwin (macOS) and linux
+    ids:
+      - default
+    # Filter to only macOS and Linux archives
+    goamd64: v1
 
 # Linux packages
 nfpms:
@@ -114,25 +135,6 @@ nfpms:
       - deb
       - rpm
       - apk
-
-archives:
-  - id: iron
+    # Only build packages from the default build
     builds:
       - default
-    format: tar.gz
-    name_template: >-
-      iron-
-      {{- if eq .Os "darwin" }}mac-
-      {{- else if eq .Os "windows" }}windows-
-      {{- else if eq .Os "linux" }}linux-{{end}}
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "arm64" }}arm64
-      {{- else }}{{.Arch}}{{end}}
-      {{- if .Arm }}v{{.Arm}}{{end}}
-    format_overrides:
-      - goos: windows
-        format: zip
-    files:
-      - README.md
-      - LICENSE
-      - CHANGELOG.md
