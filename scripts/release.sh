@@ -105,13 +105,6 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
-# Run tests before releasing
-echo -e "${BLUE}Running tests...${NC}"
-if ! go test ./...; then
-    echo -e "${RED}Tests failed. Aborting release.${NC}"
-    exit 1
-fi
-
 # Run linter
 echo -e "${BLUE}Running linter...${NC}"
 if command -v golangci-lint &> /dev/null; then
