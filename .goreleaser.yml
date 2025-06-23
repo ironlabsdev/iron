@@ -90,10 +90,6 @@ homebrew_casks:
     homepage: https://github.com/ironlabsdev/iron
     description: "CLI tool for scaffolding educational programming projects"
     license: MIT
-    test: |
-      system "#{bin}/iron --version"
-    install: |
-      bin.install "iron"
     # Post-install hook to remove quarantine bit (for unsigned binaries)
     hooks:
       post:
