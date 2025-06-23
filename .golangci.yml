@@ -1,8 +1,13 @@
 version: "2"
-run:
-  skip-dirs:
+
+issues:
+  exclude-dirs:
     - cmd/generate/templates
   timeout: 5m
 
 linters:
   default: standard
+  exclusions:
+    presets:
+      - comments
+      - common-false-positives
