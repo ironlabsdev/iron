@@ -81,13 +81,12 @@ release:
     #### Manual Download
     Download the appropriate binary for your platform from the assets below.
 
-# Homebrew
-brews:
+# Homebrew Casks (Updated for v2.10+)
+homebrew_casks:
   - name: iron
     repository:
       owner: ironlabsdev
       name: homebrew-tap
-    folder: Formula
     homepage: https://github.com/ironlabsdev/iron
     description: "CLI tool for scaffolding educational programming projects"
     license: MIT
@@ -95,6 +94,13 @@ brews:
       system "#{bin}/iron --version"
     install: |
       bin.install "iron"
+    # Post-install hook to remove quarantine bit (for unsigned binaries)
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/iron"]
+          end
 
 # Linux packages
 nfpms:

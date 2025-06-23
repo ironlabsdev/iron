@@ -29,9 +29,18 @@ jobs:
           go-version: '1.24'
           cache: true
 
+      - name: Run tests
+        run: go test ./...
+
+      - name: Run linter
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
   snapshot:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    needs: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,7 +57,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: latest
+          version: "~> v2"  # Pin to v2.x
           args: release --snapshot --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
