@@ -110,6 +110,7 @@ brews:
     repository:
       owner: ironlabsdev
       name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     homepage: https://github.com/ironlabsdev/iron
     description: "CLI tool for scaffolding educational programming projects"
     license: MIT
