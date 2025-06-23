@@ -1,6 +1,8 @@
 package generate
 
 import (
+	"bufio"
+	"bytes"
 	"embed"
 	"fmt"
 	"io/fs"
@@ -144,6 +146,31 @@ func validateTargetDirectory(fullPath string) error {
 	return nil
 }
 
+// removeBuildTags removes build tags from Go files
+func removeBuildTags(content []byte) []byte {
+	scanner := bufio.NewScanner(bytes.NewReader(content))
+	var lines []string
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// Skip build constraint lines
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "//go:build") || strings.HasPrefix(trimmed, "// +build") {
+			continue
+		}
+
+		lines = append(lines, line)
+	}
+
+	// Remove leading empty lines that might be left after removing build tags
+	for len(lines) > 0 && strings.TrimSpace(lines[0]) == "" {
+		lines = lines[1:]
+	}
+
+	return []byte(strings.Join(lines, "\n"))
+}
+
 // processTemplateFile reads, processes, and writes a template file
 func processTemplateFile(srcPath, destPath, projectName string) error {
 	// Read template content
@@ -155,6 +182,11 @@ func processTemplateFile(srcPath, destPath, projectName string) error {
 	// Create destination directory
 	if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 		return fmt.Errorf("failed to create destination directory: %w", err)
+	}
+
+	// Remove build tags from Go files
+	if strings.HasSuffix(srcPath, ".go") {
+		content = removeBuildTags(content)
 	}
 
 	// Check if file should be processed as template
@@ -213,7 +245,9 @@ func processGoTemplate(content []byte, destPath, projectName string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create destination file: %w", err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
 
 	// Execute template
 	if err := tmpl.Execute(file, data); err != nil {
